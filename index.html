@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Отзыв на студента</title>
+  <style>
+    :root {
+      --bg: #f3f5f9;
+      --panel: #ffffff;
+      --accent: #2563eb;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(14,165,233,0.12));
+    }
+    .review__wrap {
+      width: min(780px, calc(100vw - 24px));
+      max-height: calc(100vh - 32px);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+      position: relative;
+      overflow: auto;
+    }
+    h3 { margin-top: 0; margin-bottom: 12px; }
+    h4 { margin: 16px 0 8px; }
+    form { display: grid; gap: 12px; }
+    fieldset { border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    legend { padding: 0 6px; color: var(--muted); }
+    label { display: block; margin-bottom: 6px; color: var(--text); }
+    textarea, select, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font: inherit;
+      resize: vertical;
+      min-height: 44px;
+    }
+    textarea[readonly] { background: #f8fafc; color: #0f172a; }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font: inherit;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-ghost { background: #e2e8f0; color: #0f172a; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    #status { margin-top: 8px; color: var(--muted); min-height: 20px; }
+    ul { padding-left: 18px; margin: 8px 0 0; color: var(--muted); }
+    .group-hours__close-btn {
+      position: absolute;
+      right: 12px;
+      top: 12px;
+      border: none;
+      background: transparent;
+      font-size: 18px;
+      cursor: pointer;
+      color: var(--muted);
+    }
+    @media (max-width: 640px) {
+      .review__wrap { padding: 16px; width: calc(100vw - 24px); }
+      .btn-row { flex-direction: column; }
+      .btn-row .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">
+    <div class="review__wrap">
+      <button class="group-hours__close-btn" type="button" aria-label="Закрыть форму">×</button>
+      <h3>Отзыв на студента</h3>
+
+      <form id="reviewForm">
+        <fieldset>
+          <legend>Оценка</legend>
+          <label><input type="radio" name="rating" value="5" required> Отлично</label>
+          <label><input type="radio" name="rating" value="4"> Хорошо</label>
+          <label><input type="radio" name="rating" value="3"> Плохо</label>
+        </fieldset>
+
+      <label for="comment">Черновик комментария</label>
+      <textarea id="comment" name="comment" rows="4" placeholder="Что произошло на занятии, что хочется подчеркнуть" required></textarea>
+
+      <h4>Добавить тест</h4>
+      <input title="Выбрать отзыв" type="file" name="attachment">
+
+      <label for="student">Студент</label>
+      <select id="student" name="student" required>
+        <option value="">Студент не выбран</option>
+        <option value="650d8dc663fd5bf4e080aee4" data-name="Тимофеев Мирон">Тимофеев Мирон</option>
+        <option value="student-1" data-name="Студент 1">Студент 1</option>
+        <option value="student-2" data-name="Студент 2">Студент 2</option>
+        <option value="student-3" data-name="Студент 3">Студент 3</option>
+        <option value="student-4" data-name="Студент 4">Студент 4</option>
+        <option value="student-5" data-name="Студент 5">Студент 5</option>
+      </select>
+
+      <label for="teacherName">Преподаватель</label>
+      <input id="teacherName" name="teacherName" type="text" placeholder="Ваше имя" required>
+
+      <div>
+        <b>Выбери курс</b>
+        <select name="courseProgress" id="courseProgress" required>
+          <option value="">Курс не выбран</option>
+          <option value="66d1e3a22922a138f6d0527d" data-name="Майнкрафт">Майнкрафт</option>
+          <option value="6894486935d808c172deba61" data-name="Scratch">Scratch</option>
+          <option value="python-1" data-name="Python">Python</option>
+          <option value="python-2" data-name="Python 2">Python 2</option>
+          <option value="roblox" data-name="Роблокс">Роблокс</option>
+        </select>
+      </div>
+
+        <button class="btn btn-primary mgmnt__btn mgmnt__btn--review" type="submit">Сгенерировать отзыв</button>
+      </form>
+
+      <section id="results">
+        <h4>Сгенерированный отзыв</h4>
+        <textarea id="llmDraft" rows="10" readonly placeholder="Здесь появится текст нейросети"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="regenerateBtn" type="button">Перегенерировать</button>
+          <button class="btn btn-primary" id="confirmBtn" type="button">Подтвердить и сохранить</button>
+        </div>
+        <div id="status"></div>
+      </section>
+
+      <section>
+        <h4>Последние отзывы студента (из CSV)</h4>
+        <ul id="historyList"></ul>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById("reviewForm");
+    const statusEl = document.getElementById("status");
+    const draftField = document.getElementById("llmDraft");
+    const historyList = document.getElementById("historyList");
+    const regenerateBtn = document.getElementById("regenerateBtn");
+    const confirmBtn = document.getElementById("confirmBtn");
+
+    let lastPayload = null;
+    let lastResponse = null;
+
+    function collectPayload() {
+      const studentSelect = form.elements["student"];
+      const studentOption = studentSelect.options[studentSelect.selectedIndex];
+
+      const courseSelect = form.elements["courseProgress"];
+      const courseOption = courseSelect.options[courseSelect.selectedIndex];
+
+      return {
+        studentId: studentSelect.value,
+        studentName: studentOption?.dataset.name || studentOption?.textContent || "",
+        courseId: courseSelect.value,
+        courseName: courseOption?.dataset.name || courseOption?.textContent || "",
+        teacherName: form.elements["teacherName"].value,
+        rating: form.elements["rating"].value,
+        comment: form.elements["comment"].value,
+      };
+    }
+
+    function renderHistory(history = []) {
+      historyList.innerHTML = "";
+      if (!history.length) {
+        const li = document.createElement("li");
+        li.textContent = "История не найдена.";
+        historyList.appendChild(li);
+        return;
+      }
+
+      history.forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = `${item.created_date || "—"} • ${item.course_name || "—"} • оценка ${item.rating || "—"}: ${item.review_text || ""}`;
+        historyList.appendChild(li);
+      });
+    }
+
+    async function parseJsonSafe(res) {
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`Сервер вернул не-JSON (status ${res.status}): ${text.slice(0, 120)}`);
+      }
+    }
+
+    async function requestReview() {
+      const payload = collectPayload();
+      lastPayload = payload;
+      lastResponse = null;
+      statusEl.textContent = "Отправляем запрос...";
+
+      try {
+        const res = await fetch("/api/generate-review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await parseJsonSafe(res);
+        if (!res.ok) {
+          throw new Error(data.error || "Не удалось сгенерировать отзыв");
+        }
+
+        draftField.value = data.draftReview || "";
+        renderHistory(data.history || []);
+        lastResponse = data;
+        statusEl.textContent = data.llmError
+          ? `Черновик получен (предупреждение: ${data.llmError})`
+          : "Черновик получен";
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = err.message;
+        draftField.value = "";
+        renderHistory([]);
+      }
+    }
+
+    async function confirmReview() {
+      if (!draftField.value.trim()) {
+        statusEl.textContent = "Нет текста для сохранения.";
+        return;
+      }
+      if (!lastPayload) {
+        statusEl.textContent = "Сначала сгенерируйте отзыв.";
+        return;
+      }
+
+      const body = {
+        ...lastPayload,
+        reviewText: draftField.value,
+        llmError: lastResponse?.llmError,
+      };
+
+      statusEl.textContent = "Сохраняем...";
+      try {
+        const res = await fetch("/api/confirm-review", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await parseJsonSafe(res);
+        if (!res.ok) {
+          throw new Error(data.error || "Не удалось сохранить отзыв");
+        }
+        renderHistory(data.history || []);
+        statusEl.textContent = "Отзыв сохранён.";
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = err.message;
+      }
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      requestReview();
+    });
+
+    regenerateBtn.addEventListener("click", () => {
+      if (!lastPayload) {
+        statusEl.textContent = "Сначала заполните форму.";
+        return;
+      }
+      requestReview();
+    });
+
+    confirmBtn.addEventListener("click", confirmReview);
+  </script>
+</body>
+</html>
