@@ -71,7 +71,30 @@
     .btn-ghost { background: #e2e8f0; color: #0f172a; }
     .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
     #status { margin-top: 8px; color: var(--muted); min-height: 20px; }
-    ul { padding-left: 18px; margin: 8px 0 0; color: var(--muted); }
+    .history-list { display: grid; gap: 8px; margin-top: 8px; }
+    .history-item {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f8fafc;
+      overflow: hidden;
+    }
+    .history-item summary {
+      padding: 10px 12px;
+      cursor: pointer;
+      color: var(--text);
+      font-weight: 600;
+    }
+    .history-item__body {
+      padding: 0 12px 12px;
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .history-item__meta {
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .history-empty { margin: 8px 0 0; color: var(--muted); }
     .group-hours__close-btn {
       position: absolute;
       right: 12px;
@@ -96,35 +119,21 @@
       <h3>Отзыв на студента</h3>
 
       <form id="reviewForm">
-        <fieldset>
-          <legend>Оценка</legend>
-          <label><input type="radio" name="rating" value="5" required> Отлично</label>
-          <label><input type="radio" name="rating" value="4"> Хорошо</label>
-          <label><input type="radio" name="rating" value="3"> Плохо</label>
-        </fieldset>
+        <label for="teacherName">Преподаватель</label>
+        <input id="teacherName" name="teacherName" type="text" placeholder="Ваше имя" required>
 
-      <label for="comment">Черновик комментария</label>
-      <textarea id="comment" name="comment" rows="4" placeholder="Что произошло на занятии, что хочется подчеркнуть" required></textarea>
+        <label for="student">Студент</label>
+        <select id="student" name="student" required>
+          <option value="">Студент не выбран</option>
+          <option value="650d8dc663fd5bf4e080aee4" data-name="Тимофеев Мирон">Тимофеев Мирон</option>
+          <option value="student-1" data-name="Студент 1">Студент 1</option>
+          <option value="student-2" data-name="Студент 2">Студент 2</option>
+          <option value="student-3" data-name="Студент 3">Студент 3</option>
+          <option value="student-4" data-name="Студент 4">Студент 4</option>
+          <option value="student-5" data-name="Студент 5">Студент 5</option>
+        </select>
 
-      <h4>Добавить тест</h4>
-      <input title="Выбрать отзыв" type="file" name="attachment">
-
-      <label for="student">Студент</label>
-      <select id="student" name="student" required>
-        <option value="">Студент не выбран</option>
-        <option value="650d8dc663fd5bf4e080aee4" data-name="Тимофеев Мирон">Тимофеев Мирон</option>
-        <option value="student-1" data-name="Студент 1">Студент 1</option>
-        <option value="student-2" data-name="Студент 2">Студент 2</option>
-        <option value="student-3" data-name="Студент 3">Студент 3</option>
-        <option value="student-4" data-name="Студент 4">Студент 4</option>
-        <option value="student-5" data-name="Студент 5">Студент 5</option>
-      </select>
-
-      <label for="teacherName">Преподаватель</label>
-      <input id="teacherName" name="teacherName" type="text" placeholder="Ваше имя" required>
-
-      <div>
-        <b>Выбери курс</b>
+        <label for="courseProgress">Курс</label>
         <select name="courseProgress" id="courseProgress" required>
           <option value="">Курс не выбран</option>
           <option value="66d1e3a22922a138f6d0527d" data-name="Майнкрафт">Майнкрафт</option>
@@ -133,7 +142,19 @@
           <option value="python-2" data-name="Python 2">Python 2</option>
           <option value="roblox" data-name="Роблокс">Роблокс</option>
         </select>
-      </div>
+
+        <fieldset>
+          <legend>Оценка</legend>
+          <label><input type="radio" name="rating" value="5" required> Отлично</label>
+          <label><input type="radio" name="rating" value="4"> Хорошо</label>
+          <label><input type="radio" name="rating" value="3"> Плохо</label>
+        </fieldset>
+
+        <label for="comment">Черновик комментария</label>
+        <textarea id="comment" name="comment" rows="4" placeholder="Что произошло на занятии, что хочется подчеркнуть" required></textarea>
+
+        <h4>Добавить тест</h4>
+        <input title="Выбрать отзыв" type="file" name="attachment">
 
         <button class="btn btn-primary mgmnt__btn mgmnt__btn--review" type="submit">Сгенерировать отзыв</button>
       </form>
@@ -150,7 +171,7 @@
 
       <section>
         <h4>Последние отзывы студента (из CSV)</h4>
-        <ul id="historyList"></ul>
+        <div class="history-list" id="historyList"></div>
       </section>
     </div>
   </div>
@@ -187,16 +208,33 @@
     function renderHistory(history = []) {
       historyList.innerHTML = "";
       if (!history.length) {
-        const li = document.createElement("li");
-        li.textContent = "История не найдена.";
-        historyList.appendChild(li);
+        const empty = document.createElement("p");
+        empty.className = "history-empty";
+        empty.textContent = "История не найдена.";
+        historyList.appendChild(empty);
         return;
       }
 
       history.forEach((item) => {
-        const li = document.createElement("li");
-        li.textContent = `${item.created_date || "—"} • ${item.course_name || "—"} • оценка ${item.rating || "—"}: ${item.review_text || ""}`;
-        historyList.appendChild(li);
+        const details = document.createElement("details");
+        details.className = "history-item";
+
+        const summary = document.createElement("summary");
+        summary.textContent = item.created_date || "Дата не указана";
+
+        const body = document.createElement("div");
+        body.className = "history-item__body";
+
+        const meta = document.createElement("div");
+        meta.className = "history-item__meta";
+        meta.textContent = `${item.course_name || "Курс не указан"} • оценка ${item.rating || "—"}`;
+
+        const reviewText = document.createElement("div");
+        reviewText.textContent = item.review_text || "Текст отзыва отсутствует.";
+
+        body.append(meta, reviewText);
+        details.append(summary, body);
+        historyList.appendChild(details);
       });
     }
 
